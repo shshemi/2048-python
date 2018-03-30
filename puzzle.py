@@ -82,8 +82,9 @@ class GameGrid(Frame):
     def key_down(self, event):
         key = repr(event.char)
         if key in self.commands:
-            self.matrix,done = self.commands[repr(event.char)](self.matrix)
+            self.matrix,done, bonus_score = self.commands[repr(event.char)](self.matrix)
             if done:
+                print("bonus score: ", bonus_score)
                 self.matrix = add_two(self.matrix)
                 self.update_grid_cells()
                 done=False
