@@ -5,11 +5,12 @@ import random
 import numpy as np
 
 
+# -------------------------------  Machine Players -------------------------------
 class VisualMachinePlayer(Thread):
-    def __init__(self, samples_directory_name, play_function, play_interval=0.5):
+    def __init__(self, samples_directory_name, play_algorithm, play_interval=0.5):
         super().__init__()
         self.samples_directory_name = samples_directory_name
-        self.play_function = play_function
+        self.play_function = play_algorithm
         self.play_interval = play_interval
         self.visual_game = None
 
@@ -22,12 +23,15 @@ class VisualMachinePlayer(Thread):
             self.visual_game.move(move)
             time.sleep(self.play_interval)
 
+    def start_playing(self):
+        GameGrid(self)
+
 
 class BackgroundMachinePlayer(Thread):
-    def __init__(self, samples_directory_name, play_function):
+    def __init__(self, samples_directory_name, play_algorithm):
         super().__init__()
         self.samples_directory_name = samples_directory_name
-        self.play_function = play_function
+        self.play_function = play_algorithm
         self.game = Game()
         self.history = GameHistory()
 
@@ -41,12 +45,17 @@ class BackgroundMachinePlayer(Thread):
         print("Game finished with {} moves and score {}".format(self.game.total_moves, self.game.true_score))
         self.history.dump_to_file("{}/{}.hxp".format(self.samples_directory_name, int(time.time())))
 
+    def start_playing(self):
+        self.start()
 
-def random_machine_player(matrix):
-    return random.randint(0, 3)
+
+# ------------------------------- Machine Playing Algorithm -------------------------------
+class UniformRandomAlgorithm:
+    def __call__(self, *args, **kwargs):
+        return random.randint(0, 3)
 
 
-class DownLeftRightUpMachinePlayer:
+class DownLeftRightUpAlgorithm:
     def __init__(self):
         self.last_state = None
         self.last_decision = -1
@@ -73,10 +82,8 @@ class DownLeftRightUpMachinePlayer:
 
 
 if __name__ == "__main__":
-    # random_player = VisualMachinePlayer("random_played_samples", random_machine_player)
-    # visual_game = GameGrid(random_player)
-    # bmp = BackgroundMachinePlayer("random_played_samples", random_machine_player)
-    dlru = DownLeftRightUpMachinePlayer()
-    bmp = VisualMachinePlayer("dlru_played_samples", dlru)
-    visual_game = GameGrid(bmp)
-    # bmp.start()
+    # unirand = UniformRandomAlgorithm()
+    dlru = DownLeftRightUpAlgorithm()
+    # player = BackgroundMachinePlayer("dlru_played_samples", dlru)
+    player = VisualMachinePlayer("dlru_played_samples", dlru)
+    player.start_playing()
