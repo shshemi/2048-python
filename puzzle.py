@@ -84,8 +84,8 @@ class GameGrid(Frame):
                 if new_number == 0:
                     self.grid_cells[i][j].configure(text="", bg=BACKGROUND_COLOR_CELL_EMPTY)
                 else:
-                    self.grid_cells[i][j].configure(text=str(new_number), bg=BACKGROUND_COLOR_DICT[new_number],
-                                                    fg=CELL_COLOR_DICT[new_number])
+                    self.grid_cells[i][j].configure(text=str(new_number), bg=BACKGROUND_COLOR_DICT[2048 if new_number > 2048 else new_number],
+                                                    fg=CELL_COLOR_DICT[2048 if new_number > 2048 else new_number])
         self.update_idletasks()
 
     def key_down(self, event):
@@ -108,8 +108,7 @@ class GameGrid(Frame):
             self.history.add_step(matrix, cmd, bonus_score, self.game.true_score)
             self.update_grid_cells()
             if self.game.is_over():
-                self.grid_cells[1][1].configure(text="You", bg=BACKGROUND_COLOR_CELL_EMPTY)
-                self.grid_cells[1][2].configure(text="Lose!", bg=BACKGROUND_COLOR_CELL_EMPTY)
+                self.master.title("You Lose! (Score: {})".format(self.game.true_score))
                 self.history.total_score = self.game.true_score
                 self.history.total_moves = self.game.total_moves
                 self.history.invalid_moves = self.game.invalid_moves
@@ -119,7 +118,7 @@ class GameGrid(Frame):
                     self.history.dump_to_file("human_played_samples/{}.hxp".format(int(time.time())))
                 print("total score:", self.game.true_score)
         else:
-            print("invalid move")
+            print("invalid move", cmd)
         return bonus_score
 
     # def generate_next(self):
