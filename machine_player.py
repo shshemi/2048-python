@@ -3,6 +3,7 @@ from threading import Thread
 import time
 import random
 import numpy as np
+import math
 
 
 # -------------------------------  Machine Players -------------------------------
@@ -21,7 +22,8 @@ class VisualMachinePlayer(Thread):
         while not self.visual_game.game.is_over():
             move = self.play_function(self.visual_game.game.matrix)
             self.visual_game.move(move)
-            time.sleep(self.play_interval)
+            if self.play_interval > 0:
+                time.sleep(self.play_interval)
 
     def start_playing(self):
         GameGrid(self)
@@ -81,9 +83,47 @@ class DownLeftRightUpAlgorithm:
         return self.last_decision
 
 
+# ------------------------------- A Start Playing Algorithm -------------------------------
+class AStartAlgorithm:
+
+    def __init__(self):
+        self.call_count = 0
+
+    def __call__(self, matrix, *args, **kwargs):
+        self.call_count += 1
+        best_move = -1
+        best_score = -1
+        for move in range(4):
+            g = Game(matrix).clone()
+            bonus = g.move(move)
+            if bonus == -1:
+                continue
+            predicted = self.predict_score(g.matrix, 3 + int(math.log10(self.call_count)))
+            if bonus + predicted > best_score:
+                best_score = bonus + predicted
+                best_move = move
+        return best_move
+
+    def predict_score(self, matrix, steps_to_go):
+        if Game(matrix).is_over():
+            return 0
+        scores = []
+        for move in range(4):
+            g = Game(matrix).clone()
+            bonus = g.move(move)
+            if bonus == -1:
+                continue
+            if g.is_over() or steps_to_go == 0:
+                scores.append(g.move(move))
+            else:
+                scores.append(bonus + self.predict_score(g.matrix, steps_to_go-1))
+        return max(scores) if len(scores) > 0 else 0
+
+
 if __name__ == "__main__":
     # unirand = UniformRandomAlgorithm()
-    dlru = DownLeftRightUpAlgorithm()
+    # dlru = DownLeftRightUpAlgorithm()
     # player = BackgroundMachinePlayer("dlru_played_samples", dlru)
-    player = VisualMachinePlayer("dlru_played_samples", dlru)
+    astar = AStartAlgorithm()
+    player = VisualMachinePlayer("dlru_played_samples", astar, play_interval=0)
     player.start_playing()
