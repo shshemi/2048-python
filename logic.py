@@ -54,10 +54,6 @@ def add_two(mat):
 # 3 marks for correct checking
 
 def game_state(mat):
-    for i in range(len(mat)):
-        for j in range(len(mat[0])):
-            if mat[i][j]==2048:
-                return 'win'
     for i in range(len(mat)-1): #intentionally reduced to check the row on the right and below
         for j in range(len(mat[0])-1): #more elegant to use exceptions but most likely this will be their solution
             if mat[i][j]==mat[i+1][j] or mat[i][j+1]==mat[i][j]:
