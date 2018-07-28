@@ -4,14 +4,17 @@ import copy
 
 class Game:
 
-    def __init__(self):
+    def __init__(self, game=None):
         self.score = 0
         self.true_score = 0
-        self.matrix = logic.new_game(4)
         self.invalid_moves = 0
         self.total_moves = 0
-        logic.add_two(self.matrix)
-        logic.add_two(self.matrix)
+        if game is not None:
+            self.matrix = game
+        else:
+            self.matrix = logic.new_game(4)
+            logic.add_two(self.matrix)
+            logic.add_two(self.matrix)
 
     def up(self):
         self.matrix, done, bonus_score = logic.up(self.matrix)
