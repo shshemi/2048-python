@@ -1,5 +1,6 @@
 from puzzle import *
 from threading import Thread
+from multiprocessing import Process
 import time
 import random
 import numpy as np
@@ -29,26 +30,48 @@ class VisualMachinePlayer(Thread):
         GameGrid(self)
 
 
-class BackgroundMachinePlayer(Thread):
-    def __init__(self, samples_directory_name, play_algorithm):
+class BackgroundMachinePlayer:
+
+    def __init__(self, samples_directory_name, play_algorithm, finish_callback=None, game_id = -1):
         super().__init__()
         self.samples_directory_name = samples_directory_name
         self.play_function = play_algorithm
         self.game = Game()
         self.history = GameHistory()
+        self.finish_callback = finish_callback
+        self.game_id = game_id
+        self.play_time = 0
+        if game_id != -1:
+            print("Game", game_id, "created and ready to be played")
 
     def run(self):
+        start_time = time.time()
+        if self.game_id != -1:
+            print("Game", self.game_id, "started")
         while not self.game.is_over():
             matrix = self.game.matrix
             move = self.play_function(self.game.matrix)
             bonus_score = self.game.move(move)
             if bonus_score != -1:
                 self.history.add_step(matrix, move, bonus_score, self.game.true_score)
-        print("Game finished with {} moves and score {}".format(self.game.total_moves, self.game.true_score))
+        self.play_time = time.time() - start_time
+        if self.game_id != -1:
+            print("Game {} finished with {} moves and score {} and play time {}".format(self.game_id, self.game.total_moves, self.game.true_score, self.play_time))
+        else:
+            print("Game finished with {} moves and score {} and play time {}".format(self.game.total_moves, self.game.true_score, self.play_time))
         self.history.dump_to_file("{}/{}.hxp".format(self.samples_directory_name, int(time.time())))
+        if self.finish_callback is not None:
+            self.finish_callback()
 
-    def start_playing(self):
-        self.start()
+    def start_playing_as_thread(self):
+        t = Thread(target=self.run)
+        t.start()
+        return t
+
+    def start_playing_as_process(self):
+        p = Process(target=self.run)
+        p.start()
+        return p
 
 
 # ------------------------------- Machine Playing Algorithm -------------------------------
@@ -119,11 +142,3 @@ class AStartAlgorithm:
                 scores.append(bonus + self.predict_score(g.matrix, steps_to_go-1))
         return max(scores) if len(scores) > 0 else 0
 
-
-if __name__ == "__main__":
-    # unirand = UniformRandomAlgorithm()
-    # dlru = DownLeftRightUpAlgorithm()
-    # player = BackgroundMachinePlayer("dlru_played_samples", dlru)
-    astar = AStartAlgorithm()
-    player = VisualMachinePlayer("dlru_played_samples", astar, play_interval=0)
-    player.start_playing()
