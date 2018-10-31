@@ -34,12 +34,12 @@ class GameGrid(Frame):
         Frame.__init__(self)
 
         self.grid()
-        self.master.title('2048')
+        self.master.title("Paused" if machine_player_object is not None else "2048")
         self.master.bind("<Key>", self.key_down)
         # self.gamelogic = gamelogic
         self.commands = {KEY_UP: 0, KEY_DOWN: 1, KEY_LEFT: 2, KEY_RIGHT: 3,
                          KEY_UP_ALT: 0, KEY_DOWN_ALT: 1, KEY_LEFT_ALT: 2, KEY_RIGHT_ALT: 3}
-
+        self.pause = True
         self.machine_player_object = machine_player_object
         if self.is_machine_playing():
             self.machine_player_object.start()
@@ -91,9 +91,12 @@ class GameGrid(Frame):
     def key_down(self, event):
         if self.game.is_over():
             os._exit(0)
-        if self.is_machine_playing():
-            return
         key = repr(event.char)
+        if self.is_machine_playing():
+            if key == "' '":
+                self.pause = not self.pause
+                self.master.title("Paused" if self.pause else "Mohsen is playing")
+            return
         if key in self.commands:
             cmd = self.commands[key]
             self.move(cmd)

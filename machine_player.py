@@ -21,10 +21,13 @@ class VisualMachinePlayer(Thread):
         while self.visual_game is None:
             time.sleep(1)
         while not self.visual_game.game.is_over():
-            move = self.play_function(self.visual_game.game.matrix)
-            self.visual_game.move(move)
-            if self.play_interval > 0:
-                time.sleep(self.play_interval)
+            if not self.visual_game.pause:
+                move = self.play_function(self.visual_game.game.matrix)
+                self.visual_game.move(move)
+                if self.play_interval > 0:
+                    time.sleep(self.play_interval)
+            else:
+                time.sleep(1)
 
     def start_playing(self):
         GameGrid(self)
@@ -200,7 +203,7 @@ class TDTreeSearchAlgorithm:
 
 
 if __name__ == "__main__":
-    player = VisualMachinePlayer("machine_played_samples", AStartAlgorithm(), play_interval=0.25)
+    player = VisualMachinePlayer("machine_played_samples", AStartAlgorithm(), play_interval=0.0)
     player.start_playing()
     # player = BackgroundMachinePlayer("dlru_player_samples", TDTreeSearchAlgorithm())
     # player.start_playing_as_process()
