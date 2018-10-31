@@ -67,6 +67,9 @@ class BackgroundMachinePlayer:
             print("Game {} finished with {} moves and score {} and play time {}".format(self.game_id, self.game.total_moves, self.game.true_score, self.play_time))
         else:
             print("Game finished with {} moves and score {} and play time {}".format(self.game.total_moves, self.game.true_score, self.play_time))
+        self.history.total_moves = self.game.total_moves
+        self.history.invalid_moves = self.game.invalid_moves
+        self.history.total_score = self.game.true_score
         self.history.dump_to_file("{}/{}.hxp".format(self.samples_directory_name, int(time.time())))
         if self.finish_callback is not None:
             self.finish_callback()
