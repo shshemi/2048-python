@@ -130,7 +130,7 @@ class AStartAlgorithm:
         self.call_count += 1
         best_move = -1
         best_score = -1
-        look_forward_steps = int(np.count_nonzero(matrix) / 4) + 2
+        look_forward_steps = int(np.count_nonzero(matrix) / 4) + 3
         # look_forward_steps = 3 + int(math.log10(self.call_count))
         for move in range(4):
             g = Game(matrix).clone()
